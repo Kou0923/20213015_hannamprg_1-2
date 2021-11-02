@@ -4,8 +4,11 @@
 #include <Windows.h>
 #include <string.h>
 #include <time.h>
+#include <conio.h>
 
 int menu;
+bool gameover = false;
+char GO_sel;
 
 #define SIZE1 11
 #define SIZE2 19
@@ -24,6 +27,8 @@ typedef enum _MapFlag {
 	MAP_FLAG_WALL,
 	MAP_FLAG_EMPTY,
 	MAP_FLAG_VISITED,
+	MAP_FLAG_EDGE,
+	PLAYER,
 } MapFlag;
 
 const int DIR[4][2] = { {0,-2},{0,2},{-2,0},{2,0} };
@@ -89,20 +94,26 @@ COORD getRandomStartingPoint()
 }
 
 int main(void) {
+MENU:
 	printf("The Invisible Road\n\n");
-	printf("¦£¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¤\n");
-	printf("¦¢ 1. °ÔÀÓ ÁøÇà ¦¢\n");
-	printf("¦¢ 2. »óÁ¡ ÁøÀÔ ¦¢\n");
-	printf("¦¢ 3. °ÔÀÓ Á¾·á ¦¢\n");
-	printf("¦¦¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¥\n\n");
-	printf("¿øÇÏ½Ã´Â ¸Ş´ºÀÇ ¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä: ");
-Menu:
+	printf("â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”\n");
+	printf("â”‚ 1. ê²Œì„ ì§„í–‰ â”‚\n");
+	printf("â”‚ 2. ìƒì  ì§„ì… â”‚\n");
+	printf("â”‚ 3. ê²Œì„ ì¢…ë£Œ â”‚\n");
+	printf("â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜\n\n");
+	printf("ì›í•˜ì‹œëŠ” ë©”ë‰´ì˜ ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”: ");
+WRONG_SEL:
 	scanf_s("%d", &menu);
 
 	switch (menu) {
 	case 1:
 		system("cls");
+
+		int X = 1, Y = 1;
+		int key;
+
 		int map[SIZE1][SIZE1];
+
 		COORD startPoint = getRandomStartingPoint();
 
 		srand((unsigned int)time(NULL));
@@ -110,24 +121,136 @@ Menu:
 
 		generateMap(startPoint.Y, startPoint.X, map);
 
-		for (int i = 0; i < SIZE1; ++i)
-		{
-			for (int j = 0; j < SIZE1; ++j)
-				printf("%s", map[i][j] == MAP_FLAG_WALL ? "¡á" : "  ");
+		for (int i = 5; i > 0; i--) {
+			for (int i = 0; i < SIZE1; ++i) {
+				for (int j = 0; j < SIZE1; ++j) {
+					printf("%s", map[i][j] == MAP_FLAG_WALL ? "â– " : "  ");
+				}
+				printf("\n");
+			}
+			printf("%dì´ˆ ë‚¨ì•˜ìŠµë‹ˆë‹¤.", i);
+			Sleep(1000);
+			system("cls");
+		}
+		map[X][Y] = PLAYER;
+
+		for (int i = 0; i < SIZE1; ++i) {
+			for (int j = 0; j < SIZE1; ++j) {
+				printf("%s", map[i][j] == PLAYER ? "â˜…" : "  ");
+			}
 			printf("\n");
+		}
+		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+
+		while (1) {
+			if (_kbhit()) {
+				key = _getch();
+				if (key == 224 || key == 0) {
+					key = _getch();
+					switch (key) {
+					case 72:
+						if (map[X - 1][Y] == MAP_FLAG_WALL) {
+							gameover = true;
+							break;
+						}
+						system("cls");
+						map[X][Y] = MAP_FLAG_EMPTY;
+						map[X - 1][Y] = PLAYER;
+						X--;
+						for (int i = 0; i < SIZE1; i++) {
+							for (int j = 0; j < SIZE1; j++) {
+								printf("%s", map[i][j] == PLAYER ? "â˜…" : "  ");
+							}
+							printf("\n");
+						}
+						break;
+					case 75:
+						if (map[X][Y - 1] == MAP_FLAG_WALL) {
+							gameover = true;
+							break;
+						}
+						system("cls");
+						map[X][Y] = MAP_FLAG_EMPTY;
+						map[X][Y - 1] = PLAYER;
+						Y--;
+						for (int i = 0; i < SIZE1; i++) {
+							for (int j = 0; j < SIZE1; j++) {
+								printf("%s", map[i][j] == PLAYER ? "â˜…" : "  ");
+							}
+							printf("\n");
+						}
+						break;
+					case 77:
+						if (map[X][Y + 1] == MAP_FLAG_WALL) {
+							gameover = true;
+							break;
+						}
+						system("cls");
+						map[X][Y] = MAP_FLAG_EMPTY;
+						map[X][Y + 1] = PLAYER;
+						Y++;
+						for (int i = 0; i < SIZE1; i++) {
+							for (int j = 0; j < SIZE1; j++) {
+								printf("%s", map[i][j] == PLAYER ? "â˜…" : "  ");
+							}
+							printf("\n");
+						}
+						break;
+					case 80:
+						if (map[X + 1][Y] == MAP_FLAG_WALL) {
+							gameover = true;
+							break;
+						}
+						system("cls");
+						map[X][Y] = MAP_FLAG_EMPTY;
+						map[X + 1][Y] = PLAYER;
+						X++;
+						for (int i = 0; i < SIZE1; i++) {
+							for (int j = 0; j < SIZE1; j++) {
+								printf("%s", map[i][j] == PLAYER ? "â˜…" : "  ");
+							}
+							printf("\n");
+						}
+						break;
+					}
+				}
+			}
+			if (gameover) {
+				system("cls");
+				printf("GAME OVER\n\n");
+				gameover = false;
+				printf("ë©”ì¸ í™”ë©´ìœ¼ë¡œ ëŒì•„ê°€ì‹œê² ìŠµë‹ˆê¹Œ?(Y/N) >> ");
+				while (1) {
+					getchar();
+					scanf_s("%c", &GO_sel);
+					if (GO_sel == 'Y' || GO_sel == 'y') {
+						system("cls");
+						goto MENU;
+					}
+					else if (GO_sel == 'N' || GO_sel == 'n') {
+						printf("ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.");
+						break;
+					}
+					else {
+						printf("Y/N ìœ¼ë¡œ ì…ë ¥í•´ì£¼ì„¸ìš”: ");
+					}
+				}
+				break;
+			}
 		}
 		break;
 	case 2:
 		system("cls");
-		printf("Á¶°Ç ¸¸Á· 2");
+		printf("ì¡°ê±´ ë§Œì¡± 2");
 		break;
 	case 3:
 		system("cls");
-		printf("°ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.");
+		printf("ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.");
 		break;
 	default:
-		printf("Á¸ÀçÇÏÁö ¾Ê´Â ¸Ş´ºÀÔ´Ï´Ù. ´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä: ");
-		goto Menu;
+		printf("ì¡´ì¬í•˜ì§€ ì•ŠëŠ” ë©”ë‰´ì…ë‹ˆë‹¤. ë‹¤ì‹œ ì…ë ¥í•´ì£¼ì„¸ìš”: ");
+		getchar();
+		goto WRONG_SEL;
 	}
 
 	return 0;
