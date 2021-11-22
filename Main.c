@@ -18,6 +18,10 @@ char GO_sel;
 
 #define SIZE 19
 
+struct item {
+	int cost;
+};
+
 typedef enum _Direction {
 	DIRECTION_LEFT,
 	DIRECTION_UP,
@@ -159,6 +163,8 @@ COORD getRandomStartingPoint() {
 }
 
 int main(void) {
+	struct item increase_timer = { 15 };
+
 MENU:
 	system("cls");
 	printf("The Invisible Road\n\n");
@@ -323,7 +329,7 @@ SHOP:
 		system("cls");
 		printf("Shop\n\n");
 		printf("┌───────────────────────────┐\n");
-		printf("│ 1. 추가 시간 (+1초) - 15P │\n");
+		printf("│ 1. 추가 시간 (+1초) - %dP │\n", increase_timer.cost);
 		printf("│ 0. 메뉴로 돌아가기        │\n");
 		printf("└───────────────────────────┘\n");
 		printf("보유 포인트: %d\n", point);
@@ -334,9 +340,9 @@ WRONG_SEL_SHOP:
 		while (1) {
 			switch (shop) {
 			case 1:
-				if (point >= 15) {
+				if (point >= increase_timer.cost) {
 					printf("추가 시간이 1초 늘어났습니다.\n\n");
-					point -= 15;
+					point -= increase_timer.cost;
 					plusMinute += 1;
 					Sleep(200 * 3);
 					goto SHOP;
